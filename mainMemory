@@ -1,0 +1,42 @@
+def reading(dictionary):
+    get_out = False
+    while not get_out:
+        adress = input('Informe o endereço a ser lido. Deve ser um binário de 4 bits:')
+        if len(adress) != 4:
+            print('Dados inválidos. O endereço deve possuir o tamanho informado.')
+        else:
+            print(dictionary[adress])
+            get_out = True
+
+
+def writing(dictionary):
+    get_out = False
+    while not get_out:
+        adress = input('Informe o endereço. Deve ser um binário de 4 bits:')
+        value = input('Digite o dado a ser armazenado. Deve ser um binário de 8 bits:')
+        if len(adress) != 4 or len(value) != 8:
+            print('Dados inválidos. O endereço e o dado devem possuir o tamanho informado.')
+        else:
+            dictionary[adress] = value
+            print(dictionary)
+            get_out = True
+
+
+def show(dictionary):
+    for key in dictionary:
+        print(dictionary[key])
+
+
+dictionary = {'0000': '00000000', '0001': '00000000', '0010': '00000000', '0011': '00000000', '0100': '00000000', '0101': '00000000', '0110': '00000000', '0111': '00000000', '1000': '00000000', '1001': '00000000', '1010': '00000000', '1011': '00000000', '1100': '00000000', '1101': '00000000', '1110': '00000000', '1111': '00000000'}
+
+command = input('Digite "E" para escrever, "L" para ler, "M" para mostrar todos os dados armazenados na memória ou qualquer outra tecla para parar:').upper()
+
+while command == "L" or command == "E" or command == "M":
+    if command == "E":
+        writing(dictionary)
+    if command == "L":
+        reading(dictionary)
+    if command == "M":
+        print(show(dictionary))
+    command = input('Digite "E" para escrever, "L" para ler, "M" para mostrar todos os dados armazenados na memória ou qualquer outra tecla para parar:').upper()
+print('Fim do código.')
