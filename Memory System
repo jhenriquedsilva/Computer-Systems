@@ -1,0 +1,261 @@
+# Esse sistema de memória funciona com uma memória principal de 64B e uma memória cache com 16B.
+# A principal possui cada endereço com 5 bits e cada célula com 8 bits.
+# A cache é mapeada pelo método associativo por conjuntos. Neste caso, ela possui 2 conjuntos, cada
+# um com 2 linhas, as quais contêm 2 células.
+from random import randint
+
+# Validando o endereço e o valor a ser armazenado na célula.
+# Ambos devem ser compostos apenas por 1s e 0s e o endereço deve sempre ter 6 bits e o dado, 8 bits.
+def validates(adress, value=None):
+    dec_numbers = ['2', '3', '4', '5', '6', '7', '8', '9']
+    # Se o valor for diferente do valor padrão "None", significa que está ocorrendo uma escrita.
+    if value:
+        if len(adress) != 6 or len(value) != 8:
+            return True
+        for n in adress:
+            if n in dec_numbers:
+                return True
+        for n in value:
+            if n in dec_numbers:
+                return True
+        return False
+    # Se o valor for igual a "None", significa que está ocorrendo uma leitura.
+    else:
+        if len(adress) != 6:
+            return True
+        for n in adress:
+            if n in dec_numbers:
+                return True
+        return False
+
+
+# Escrevendo na cache e na memória principal.
+def writes(cache, main):
+    # Enquanto o endereço ou o valor não forem válidos, o laço não termina.
+    while True:
+        adress = input('Informe o endereço. Deve ser um binário de 6 bits:')
+        value = input('Digite o dado a ser armazenado. Deve ser um binário de 8 bits:')
+        invalid = validates(adress, value)
+        if invalid:
+            print('Dados inválidos. O endereço deve possuir o tamanho informado.', end=" ")
+            print('E pode ser composto apenas pelos algarismos 1 e 0.')
+        else:
+            set_field = adress[4]
+            cell_field = adress[5]
+            tag_field = adress[0:4]
+            # Procura o conjunto
+            for set_ in cache:
+                if set_ == set_field:
+                    # Guarda as linhas do conjunto para serem manipuladas.
+                    rows = cache[set_]
+                    # Se o bloco estiver na linha, atualiza-se a célula na cache e na memória principal
+                    if tag_field in rows:
+                        for tag in rows:
+                            if tag == tag_field:
+                                rows[tag][int(cell_field)] = value
+                                print(rows)
+                                main[adress] = value
+                                return
+                    # Se o bloco não estiver na linha
+                    if tag_field not in rows:
+                        which_line = randint(0, 1)
+                        # Se a célular a ser atualizada for a 0
+                        if int(cell_field) == 0:
+                            select = 0
+                            # É necessário escolher uma das linhas aleatoriamente, atualizar o campo tag,
+                            # atualizar a primeira célula da linha com o valor dado e atualizar a segunda
+                            # célula da linha com o valor correspondente na memória principal
+                            for tag in rows:
+                                if select == which_line:
+                                    print(f'A linha {tag} será atualizada.')
+                                    del rows[tag]
+                                    print(rows)
+                                    new_tag = adress[0:4]
+                                    rows[new_tag] = []
+                                    print(rows)
+                                    rows[new_tag].append(value)
+                                    print(rows)
+                                    main[adress] = value
+                                    res = None
+                                    temp = iter(main)
+                                    for key in temp:
+                                        if key == adress:
+                                            res = next(temp, None)
+                                    rows[new_tag].append(main[str(res)])
+                                    print(rows)
+                                    print(main)
+                                    return
+                                select += 1
+                        # Se a célula a ser atualizada for a 1
+                        if int(cell_field) == 1:
+                            select = 0
+                            for tag in rows:
+                                print(rows)
+                                # É necessário escolher uma das linhas aleatoriamente, atualizar o campo tag,
+                                # atualizar a primeira célula com o valor correspondente na principal e atualizar
+                                # a segunda célula com o valor dado.
+                                if select == which_line:
+                                    print(f'A linha {tag} será atualizada.')
+                                    del rows[tag]
+                                    print(rows)
+                                    new_tag = adress[0:4]
+                                    rows[new_tag] = []
+                                    print(rows)
+                                    block_field = adress[0:5]
+                                    cell = None
+                                    for key in main:
+                                        if key[0:5] == block_field:
+                                            cell = main[key]
+                                            break
+                                    rows[new_tag].append(cell)
+                                    rows[new_tag].append(value)
+                                    print(rows)
+                                    main[adress] = value
+                                    print(main)
+                                    return
+                                select += 1
+
+
+def updates_cache(cache, main, adress):
+    which_line = randint(0, 1)
+    print(f'Which_line is {which_line}')
+    counter = 1
+    for main_adress in main:
+        block_field = adress[0:5]
+        if main_adress[0:5] == block_field:
+            cell = main[main_adress]
+            if counter == 1:
+                for set_ in cache:
+                    if main_adress[4] == set_:
+                        rows = cache[set_]
+                        select = 0
+                        for tag in rows:
+                            print(f'Select is {select}')
+                            if select == which_line:
+                                del rows[tag]
+                                print(rows)
+                                new_tag = main_adress[0:4]
+                                rows[new_tag] = []
+                                print(rows)
+                                rows[new_tag].append(cell)
+                                print(rows)
+                                break
+                            select += 1
+                        break
+                counter += 1
+                continue
+            if counter == 2:
+                print(cell)
+                for set_ in cache:
+                    if main_adress[4] == set_:
+                        rows = cache[set_]
+                        for tag in rows:
+                            if tag == main_adress[0:4]:
+                                print(rows)
+                                rows[tag].append(cell)
+                                print(rows)
+                                return
+
+
+def reads(cache, main):
+    while True:
+        adress = input('Informe o endereço a ser lido. Deve ser um binário de 6 bits:')
+        invalid = validates(adress)
+        if invalid:
+            print('Dados inválidos. O endereço deve possuir o tamanho informado.', end=" ")
+            print('E pode ser composto apenas pelos algarismos 1 e 0.')
+        else:
+            set_field = adress[4]
+            tag_field = adress[0:4]
+            cell_field = adress[5]
+            print(set_field, tag_field, cell_field)
+            for set_ in cache:
+                if set_ == set_field:
+                    rows = cache[set_]
+                    print(rows)
+                    for tag in rows:
+                        print(tag)
+                        if tag == tag_field:
+                            print(rows[tag][int(cell_field)])
+                            return
+                    updates_cache(cache, main, adress)
+                    for set_ in cache:
+                        if set_ == set_field:
+                            rows = cache[set_]
+                            print(rows)
+                            for tag in rows:
+                                print(tag)
+                                if tag == tag_field:
+                                    print(rows[tag][int(cell_field)])
+                                    return
+
+
+def shows(cache, main):
+    print("Memória Cache:")
+    for row in cache.values():
+        for cells in row.values():
+            for cell in cells:
+                print(cell)
+    print("Memória Principal:")
+    for adress in main:
+        print(main[adress])
+
+
+cache_memory = {
+    "0": {"0001": ['11111111', '10101010'], "1111": ['10101010', '10101010']},
+    "1": {"0010": ['10101010', '10101010'], "0011": ['10101010', '00000000']},
+}
+
+main_memory = {
+    '000000': '11110000', '000001': '00000000',
+    '000010': '00000000', '000011': '00000000',
+    '000100': '00000000', '000101': '00000000',
+    '000110': '00000000', '000111': '00000000',
+    '001000': '00000000', '001001': '00000000',
+    '001010': '00000000', '001011': '00000000',
+    '001100': '00000000', '001101': '00000000',
+    '001110': '00000000', '001111': '00000000',
+    '010000': '00000000', '010001': '00000000',
+    '010010': '00000000', '010011': '00000000',
+    '010100': '00000000', '010101': '00000000',
+    '010110': '00000000', '010111': '00000000',
+    '011000': '00000000', '011001': '00000000',
+    '011010': '00000000', '011011': '00000000',
+    '011100': '00000000', '011101': '00000000',
+    '011110': '00000000', '011111': '00000000',
+    '100000': '00000000', '100001': '00000000',
+    '100010': '00000000', '100011': '00000000',
+    '100100': '00000000', '100101': '00000000',
+    '100110': '00000000', '100111': '00000000',
+    '101000': '00000000', '101001': '00000000',
+    '101010': '00000000', '101011': '00000000',
+    '101100': '00000000', '101101': '00000000',
+    '101110': '00000000', '101111': '00000000',
+    '110000': '00000000', '110001': '00000000',
+    '110010': '00000000', '110011': '00000000',
+    '110100': '00000000', '110101': '00000000',
+    '110110': '00000000', '110111': '00000000',
+    '111000': '00000000', '111001': '11100111',
+    '111010': '00000000', '111011': '00000000',
+    '111100': '00000000', '111101': '00000000',
+    '111110': '00000000', '111111': '11100000',
+}
+
+# Recebendo input do usuário
+print('Digite "E" para escrever, "L" para ler, "M" para mostrar todas as células da memória.', end=" ")
+print('Se quiser parar as operações, digite qualquer outra tecla.')
+command = input().upper()
+
+# Escolhendo uma das operações
+while command == "L" or command == "E" or command == "M":
+    if command == "E":
+        writes(cache_memory, main_memory)
+    if command == "L":
+        reads(cache_memory, main_memory)
+    if command == "M":
+        shows(cache_memory, main_memory)
+    print('Digite "E" para escrever, "L" para ler, "M" para mostrar todas as células da memória.', end=" ")
+    print('Se quiser parar as operações, digite qualquer outra tecla.')
+    command = input().upper()
+
+print("Fim do código.")
