@@ -1,0 +1,256 @@
+def store_data(rdm, rem, main):
+    print(f"REM = {bin(rem)}")
+    print(f"RDM = {bin(rdm)}")
+    print("WRITE")
+    main[rem] = rdm
+    print(f"INPUT STORED")
+
+
+def gets_data(rem, main):
+    print(f"REM = {bin(rem)}")
+    print("READ")
+    rdm = main[rem]
+    print(f"RDM = {bin(rdm)}")
+    return rdm
+
+
+def gets_op(binary):
+    while binary >= 256:
+        if binary >= 2048:
+            binary = binary % 2048
+        elif binary >= 1024:
+            binary = binary % 1024
+        elif binary >= 512:
+            binary = binary % 512
+        elif binary >= 256:
+            binary = binary % 256
+    return binary
+
+
+def gets_c_op(binary):
+    c_op = binary >> 8
+    return c_op
+
+
+def gets_instructions(main_memory):
+    ci = 0b00000000; r0 = 0; hlt = 0b0000; rem = ci;
+    lda_op = 0b0001; str_op = 0b0010; add_op = 0b0011; sub_op = 0b0100; jz_op = 0b0101;
+    jp_op = 0b0110; jn_op = 0b0111; jmp_op = 0b1000; get_op = 0b1001; prt_op = 0b1010
+    print(f"\nCI = {bin(ci)}")
+    ciclo = 0
+    while True:
+            print(f'\nREM = {bin(rem)}')
+            print("\nInstrução encontrada na memória")
+            rdm = main_memory[rem]
+            print(f"\nRDM = {bin(rdm)}")
+            ri = rdm
+            print(f"\nRI = {bin(ri)}")
+            ci += 0b1
+            rem = ci
+            print(f"\nCI incrementado = {bin(ci)}")
+            c_op = gets_c_op(ri)
+            print(f"\nC.Op = {bin(c_op)}")
+            if c_op == hlt:
+                print("\nInstrução HLT será executada")
+                return
+            elif c_op == lda_op:
+                print("\nInstrução LDA será executada")
+                op = gets_op(ri)
+                print(f"Op = {bin(op)}")
+                r0 = gets_data(op, main_memory)
+                print(f'R0 = {bin(r0)}')
+            elif c_op == str_op:
+                print("\nInstrução STR será executada")
+                op = gets_op(ri)
+                print(f"Op = {bin(op)}")
+                store_data(r0, op, main_memory)
+            elif c_op == add_op:
+                print("\nInstrução ADD será executada")
+                op = gets_op(ri)
+                print(f"Op = {bin(op)}")
+                rdm = gets_data(op, main_memory)
+                r0 += rdm
+                print(f'R0 = {bin(r0)}')
+            elif c_op == sub_op:
+                print("\nInstrução SUB será executada")
+                op = gets_op(ri)
+                print(f"Op = {bin(op)}")
+                rdm = gets_data(op, main_memory)
+                r0 -= rdm
+                print(f'R0 = {bin(r0)}')
+            elif c_op == jz_op:
+                print("\nInstrução JZ será executada")
+                if r0 == 0:
+                    op = gets_op(ri)
+                    print(f"Op = {bin(op)}")
+                    ci = op
+                    rem = ci
+                    ciclo += 1
+                    print(f"CICLO {ciclo}")
+            elif c_op == jp_op:
+                print("\nInstrução JP será executada")
+                if r0 > 0:
+                    op = gets_op(ri)
+                    print(f"Op = {bin(op)}")
+                    ci = op
+                    rem = ci
+                    ciclo += 1
+                    print(f"CICLO {ciclo}")
+            elif c_op == jn_op:
+                print("\nInstrução JN será executada")
+                if r0 < 0:
+                    op = gets_op(ri)
+                    print(f"Op = {bin(op)}")
+                    ci = op
+                    rem = ci
+                    ciclo += 1
+                    print(f"CICLO {ciclo}")
+            elif c_op == jmp_op:
+                print("\nInstrução JMP será executada")
+                op = gets_op(ri)
+                print(f"Op = {bin(op)}")
+                ci = op
+                rem = ci
+                ciclo += 1
+                print(f"CICLO {ciclo}")
+            elif c_op == get_op:
+                print("\nInstrução GET será executada")
+                op = gets_op(ri)
+                print(f"Op = {bin(op)}")
+                data = int(input(), 2)
+                store_data(data, op, main_memory)
+            elif c_op == prt_op:
+                print("\nInstrução PRT será executada")
+                op = gets_op(ri)
+                print(f"Op = {bin(op)}")
+                data = gets_data(op, main_memory)
+                print(f"OUTPUT = {bin(data)}")
+
+
+# Carrega o programa para a memória principal
+def loads(program, main_memory):
+    for adress1 in main_memory:
+        for adress2 in program:
+            if adress2 == adress1:
+                main_memory[adress1] = program[adress2]
+    print("\nA memória foi carragada")
+
+
+def main():
+    # Memória principal
+    main_memory = {
+        0b00000000: None, 0b00000001: None, 0b00000010: None, 0b00000011: None,
+        0b00000100: None, 0b00000101: None, 0b00000110: None, 0b00000111: None,
+        0b00001000: None, 0b00001001: None, 0b00001010: None, 0b00001011: None,
+        0b00001100: None, 0b00001101: None, 0b00001110: None, 0b00001111: None,
+        0b00010000: None, 0b00010001: None, 0b00010010: None, 0b00010011: None,
+        0b00010100: None, 0b00010101: None, 0b00010110: None, 0b00010111: None,
+        0b00011000: None, 0b00011001: None, 0b00011010: None, 0b00011011: None,
+        0b00011100: None, 0b00011101: None, 0b00011110: None, 0b00011111: None,
+        0b00100000: None, 0b00100001: None, 0b00100010: None, 0b00100011: None,
+        0b00100100: None, 0b00100101: None, 0b00100110: None, 0b00100111: None,
+        0b00101000: None, 0b00101001: None, 0b00101010: None, 0b00101011: None,
+        0b00101100: None, 0b00101101: None, 0b00101110: None, 0b00101111: None,
+        0b00110000: None, 0b00110001: None, 0b00110010: None, 0b00110011: None,
+        0b00110100: None, 0b00110101: None, 0b00110110: None, 0b00110111: None,
+        0b00111000: None, 0b00111001: None, 0b00111010: None, 0b00111011: None,
+        0b00111100: None, 0b00111101: None, 0b00111110: None, 0b00111111: None,
+        0b01000000: None, 0b01000001: None, 0b01000010: None, 0b01000011: None,
+        0b01000100: None, 0b01000101: None, 0b01000110: None, 0b01000111: None,
+        0b01001000: None, 0b01001001: None, 0b01001010: None, 0b01001011: None,
+        0b01001100: None, 0b01001101: None, 0b01001110: None, 0b01001111: None,
+        0b01010000: None, 0b01010001: None, 0b01010010: None, 0b01010011: None,
+        0b01010100: None, 0b01010101: None, 0b01010110: None, 0b01010111: None,
+        0b01011000: None, 0b01011001: None, 0b01011010: None, 0b01011011: None,
+        0b01011100: None, 0b01011101: None, 0b01011110: None, 0b01011111: None,
+        0b01100000: None, 0b01100001: None, 0b01100010: None, 0b01100011: None,
+        0b01100100: None, 0b01100101: None, 0b01100110: None, 0b01100111: None,
+        0b01101000: None, 0b01101001: None, 0b01101010: None, 0b01101011: None,
+        0b01101100: None, 0b01101101: None, 0b01101110: None, 0b01101111: None,
+        0b01110000: None, 0b01110001: None, 0b01110010: None, 0b01110011: None,
+        0b01110100: None, 0b01110101: None, 0b01110110: None, 0b01110111: None,
+        0b01111000: None, 0b01111001: None, 0b01111010: None, 0b01111011: None,
+        0b01111100: None, 0b01111101: None, 0b01111110: None, 0b01111111: None,
+        0b10000000: None, 0b10000001: None, 0b10000010: None, 0b10000011: None,
+        0b10000100: None, 0b10000101: None, 0b10000110: None, 0b10000111: None,
+        0b10001000: None, 0b10001001: None, 0b10001010: None, 0b10001011: None,
+        0b10001100: None, 0b10001101: None, 0b10001110: None, 0b10001111: None,
+        0b10010000: None, 0b10010001: None, 0b10010010: None, 0b10010011: None,
+        0b10010100: None, 0b10010101: None, 0b10010110: None, 0b10010111: None,
+        0b10011000: None, 0b10011001: None, 0b10011010: None, 0b10011011: None,
+        0b10011100: None, 0b10011101: None, 0b10011110: None, 0b10011111: None,
+        0b10100000: None, 0b10100001: None, 0b10100010: None, 0b10100011: None,
+        0b10100100: None, 0b10100101: None, 0b10100110: None, 0b10100111: None,
+        0b10101000: None, 0b10101001: None, 0b10101010: None, 0b10101011: None,
+        0b10101100: None, 0b10101101: None, 0b10101110: None, 0b10101111: None,
+        0b10110000: None, 0b10110001: None, 0b10110010: None, 0b10110011: None,
+        0b10110100: None, 0b10110101: None, 0b10110110: None, 0b10110111: None,
+        0b10111000: None, 0b10111001: None, 0b10111010: None, 0b10111011: None,
+        0b10111100: None, 0b10111101: None, 0b10111110: None, 0b10111111: None,
+        0b11000000: None, 0b11000001: None, 0b11000010: None, 0b11000011: None,
+        0b11000100: None, 0b11000101: None, 0b11000110: None, 0b11000111: None,
+        0b11001000: None, 0b11001001: None, 0b11001010: None, 0b11001011: None,
+        0b11001100: None, 0b11001101: None, 0b11001110: None, 0b11001111: None,
+        0b11010000: None, 0b11010001: None, 0b11010010: None, 0b11010011: None,
+        0b11010100: None, 0b11010101: None, 0b11010110: None, 0b11010111: None,
+        0b11011000: None, 0b11011001: None, 0b11011010: None, 0b11011011: None,
+        0b11011100: None, 0b11011101: None, 0b11011110: None, 0b11011111: None,
+        0b11100000: None, 0b11100001: None, 0b11100010: None, 0b11100011: None,
+        0b11100100: None, 0b11100101: None, 0b11100110: None, 0b11100111: None,
+        0b11101000: None, 0b11101001: None, 0b11101010: None, 0b11101011: None,
+        0b11101100: None, 0b11101101: None, 0b11101110: None, 0b11101111: None,
+        0b11110000: None, 0b11110001: None, 0b11110010: None, 0b11110011: None,
+        0b11110100: None, 0b11110101: None, 0b11110110: None, 0b11110111: None,
+        0b11111000: None, 0b11111001: None, 0b11111010: None, 0b11111011: None,
+        0b11111100: None, 0b11111101: None, 0b11111110: None, 0b11111111: None,
+    }
+    # Programas que serão executados
+    maior_entre_2_numeros = {
+        0b00000000: 0b000110110100, 0b00000001: 0b010010110101, 0b00000010: 0b011100000101,
+        0b00000011: 0b101010110100, 0b00000100: 0b100000000110, 0b00000101: 0b101010110101,
+        0b00000110: 0b000000000000, 0b10110100: 0b001010110011, 0b10110101: 0b000110100011,
+    }
+    usando_jp = {
+        0b00000000: 0b000110110100, 0b00000001: 0b010010110101, 0b00000010: 0b101000000101,
+        0b00000011: 0b101010110101, 0b00000100: 0b100000000110, 0b00000101: 0b101010110100,
+        0b00000110: 0b000000000000, 0b10110100: 0b001010110011, 0b10110101: 0b000110100011,
+    }
+    de_10_a_0 = {
+        0b00000000: 0b101010110101, 0b00000001: 0b000110110101, 0b00000010: 0b010010110100,
+        0b00000011: 0b001010110101, 0b00000100: 0b101010110101, 0b00000101: 0b010100000111,
+        0b00000110: 0b100000000001, 0b00000111: 0b000000000000, 0b10110100: 0b000000000001,
+        0b10110101: 0b000000010000
+    }
+
+    # O usuário escolhe qual programa será executado
+    print('Digite "1" para executar o programa "Maior entre 2 números, "2" para executar o programa "Usando o Jump"', end=" ")
+    print('ou "3" para executar o programa "De 10 a 0"')
+    print('Se quiser parar as execuções, digite qualquer outro número.')
+    command = int(input())
+
+    # Seleciona um dos programas
+    while command == 1 or command == 2 or command == 3:
+        if command == 1:
+            print('\nO programa "Maior entre dois números" será executado.')
+            loads(maior_entre_2_numeros, main_memory)
+            gets_instructions(main_memory)
+        elif command == 2:
+            print('\nO programa "Usando Jump" será executado.')
+            loads(usando_jp, main_memory)
+            gets_instructions(main_memory)
+        elif command == 3:
+            print('\nO programa "De 10 a 0" será executado.')
+            loads(de_10_a_0, main_memory)
+            gets_instructions(main_memory)
+        # O usuário escolhe qual programa será executado
+        print('\nDigite "1" para executar o programa "Maior entre 2 números, "2" para executar o programa "Usando o Jump"', end=" ")
+        print('ou "3" para executar o programa "De 10 a 0"')
+        print('Se quiser parar as execuções, digite qualquer outro múmero.')
+        command = int(input())
+    return
+
+
+if __name__ == "__main__":
+    main()
+
+print('Fim do programa!')
