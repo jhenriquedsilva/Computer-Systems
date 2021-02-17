@@ -1,4 +1,4 @@
-def store_data(rdm, rem, main):
+def stores_data(rdm, rem, main):
     print(f"REM = {bin(rem)}")
     print(f"RDM = {bin(rdm)}")
     print("WRITE")
@@ -33,11 +33,10 @@ def gets_c_op(binary):
 
 
 def gets_instructions(main_memory):
-    ci = 0b00000000; r0 = 0; hlt = 0b0000; rem = ci;
-    lda_op = 0b0001; str_op = 0b0010; add_op = 0b0011; sub_op = 0b0100; jz_op = 0b0101;
+    ci = 0b00000000; r0 = 0; rem = ci;
+    hlt = 0b0000; lda_op = 0b0001; str_op = 0b0010; add_op = 0b0011; sub_op = 0b0100; jz_op = 0b0101;
     jp_op = 0b0110; jn_op = 0b0111; jmp_op = 0b1000; get_op = 0b1001; prt_op = 0b1010
     print(f"\nCI = {bin(ci)}")
-    ciclo = 0
     while True:
             print(f'\nREM = {bin(rem)}')
             print("\nInstrução encontrada na memória")
@@ -63,7 +62,7 @@ def gets_instructions(main_memory):
                 print("\nInstrução STR será executada")
                 op = gets_op(ri)
                 print(f"Op = {bin(op)}")
-                store_data(r0, op, main_memory)
+                stores_data(r0, op, main_memory)
             elif c_op == add_op:
                 print("\nInstrução ADD será executada")
                 op = gets_op(ri)
@@ -85,8 +84,6 @@ def gets_instructions(main_memory):
                     print(f"Op = {bin(op)}")
                     ci = op
                     rem = ci
-                    ciclo += 1
-                    print(f"CICLO {ciclo}")
             elif c_op == jp_op:
                 print("\nInstrução JP será executada")
                 if r0 > 0:
@@ -94,8 +91,6 @@ def gets_instructions(main_memory):
                     print(f"Op = {bin(op)}")
                     ci = op
                     rem = ci
-                    ciclo += 1
-                    print(f"CICLO {ciclo}")
             elif c_op == jn_op:
                 print("\nInstrução JN será executada")
                 if r0 < 0:
@@ -103,28 +98,24 @@ def gets_instructions(main_memory):
                     print(f"Op = {bin(op)}")
                     ci = op
                     rem = ci
-                    ciclo += 1
-                    print(f"CICLO {ciclo}")
             elif c_op == jmp_op:
                 print("\nInstrução JMP será executada")
                 op = gets_op(ri)
                 print(f"Op = {bin(op)}")
                 ci = op
                 rem = ci
-                ciclo += 1
-                print(f"CICLO {ciclo}")
             elif c_op == get_op:
                 print("\nInstrução GET será executada")
                 op = gets_op(ri)
                 print(f"Op = {bin(op)}")
                 data = int(input(), 2)
-                store_data(data, op, main_memory)
+                stores_data(data, op, main_memory)
             elif c_op == prt_op:
                 print("\nInstrução PRT será executada")
                 op = gets_op(ri)
                 print(f"Op = {bin(op)}")
                 data = gets_data(op, main_memory)
-                print(f"OUTPUT = {bin(data)}")
+                print(f"OUTPUT = {data}")
 
 
 # Carrega o programa para a memória principal
@@ -211,7 +202,7 @@ def main():
         0b00000110: 0b000000000000, 0b10110100: 0b001010110011, 0b10110101: 0b000110100011,
     }
     usando_jp = {
-        0b00000000: 0b000110110100, 0b00000001: 0b010010110101, 0b00000010: 0b101000000101,
+        0b00000000: 0b000110110100, 0b00000001: 0b010010110101, 0b00000010: 0b011000000101,
         0b00000011: 0b101010110101, 0b00000100: 0b100000000110, 0b00000101: 0b101010110100,
         0b00000110: 0b000000000000, 0b10110100: 0b001010110011, 0b10110101: 0b000110100011,
     }
@@ -219,7 +210,7 @@ def main():
         0b00000000: 0b101010110101, 0b00000001: 0b000110110101, 0b00000010: 0b010010110100,
         0b00000011: 0b001010110101, 0b00000100: 0b101010110101, 0b00000101: 0b010100000111,
         0b00000110: 0b100000000001, 0b00000111: 0b000000000000, 0b10110100: 0b000000000001,
-        0b10110101: 0b000000010000
+        0b10110101: 0b000000001010
     }
 
     # O usuário escolhe qual programa será executado
